@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Loading - Realistic Water Effect</title>
+    <!-- Include Three.js via CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body, html {
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background-color: #020408;
+        font-family: "Poppins", sans-serif;
+      }
+
+      /* Three.js Canvas Background */
+      #webgl-container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 0;
+      }
+
+      /* Centered Loader Wrapper container */
+      .center-container {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 10;
+        pointer-events: none; /* Allows mouse events to click-through to water canvas */
+      }
+
+      .loader-wrapper {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 120px;
+        width: auto;
+        margin: 2rem;
+        font-size: 1.6em;
+        font-weight: 600;
+        user-select: none;
+        color: #fff;
+        scale: 2;
+      }
+
+      .loader {
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 100%;
+        width: 100%;
+        z-index: 1;
+        background-color: transparent;
+        mask: repeating-linear-gradient(
+          90deg,
+          transparent 0,
+          transparent 6px,
+          black 7px,
+          black 8px
+        );
+        -webkit-mask: repeating-linear-gradient(
+          90deg,
+          transparent 0,
+          transparent 6px,
+          black 7px,
+          black 8px
+        );
+      }
+
+      .loader::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        /* Deep black and rich neon/electric blue gradient combination */
+        background-image: radial-gradient(circle at 50% 50%, #00e1ff 0%, transparent 50%),
+          radial-gradient(circle at 45% 45%, #0044cc 0%, transparent 45%),
+          radial-gradient(circle at 55% 55%, #1a8cff 0%, transparent 45%),
+          radial-gradient(circle at 45% 55%, #001a4d 0%, transparent 45%),
+          radial-gradient(circle at 55% 45%, #00bfff 0%, transparent 45%);
+        mask: radial-gradient(
+          circle at 50% 50%,
+          transparent 0%,
+          transparent 10%,
+          black 25%
+        );
+        -webkit-mask: radial-gradient(
+          circle at 50% 50%,
+          transparent 0%,
+          transparent 10%,
+          black 25%
+        );
+        animation:
+          transform-animation 2s infinite alternate,
+          opacity-animation 4s infinite;
+        animation-timing-function: cubic-bezier(0.6, 0.8, 0.5, 1);
+      }
+
+      @keyframes transform-animation {
+        0% {
+          transform: translate(-55%);
+        }
+        100% {
+          transform: translate(55%);
+        }
+      }
+
+      @keyframes opacity-animation {
+        0%,
+        100% {
+          opacity: 0;
+        }
+        15% {
+          opacity: 1;
+        }
+        65% {
+          opacity: 0;
+        }
+      }
+
+      .loader-letter {
+        display: inline-block;
+        opacity: 0;
+        animation: loader-letter-anim 4s infinite linear;
+        z-index: 2;
+        text-shadow: 0 0 12px rgba(0, 200, 255, 0.6);
+      }
+
+      .loader-letter:nth-child(1) { animation-delay: 0.1s; }
+      .loader-letter:nth-child(2) { animation-delay: 0.205s; }
+      .loader-letter:nth-child(3) { animation-delay: 0.31s; }
+      .loader-letter:nth-child(4) { animation-delay: 0.415s; }
+      .loader-letter:nth-child(5) { animation-delay: 0.521s; }
+      .loader-letter:nth-child(6) { animation-delay: 0.626s; }
+      .loader-letter:nth-child(7) { animation-delay: 0.731s; }
+      .loader-letter:nth-child(8) { animation-delay: 0.837s; }
+      .loader-letter:nth-child(9) { animation-delay: 0.942s; }
+      .loader-letter:nth-child(10) { animation-delay: 1.047s; }
+
+      @keyframes loader-letter-anim {
+        0% {
+          opacity: 0;
+        }
+        5% {
+          opacity: 1;
+          text-shadow: 0 0 10px #00e1ff;
+          transform: scale(1.1) translateY(-2px);
+        }
+        20% {
+          opacity: 0.2;
+        }
+        100% {
+          opacity: 0;
+        }
+      }
+    </style>
+  </head>
+  <body>
+
+    <!-- Three.js Water Background Container -->
+    <div id="webgl-container"></div>
+
+    <!-- Centered Loader Component -->
+    <div class="center-container">
+      <div class="loader-wrapper">
+        <span class="loader-letter">L</span>
+        <span class="loader-letter">o</span>
+        <span class="loader-letter">a</span>
+        <span class="loader-letter">d</span>
+        <span class="loader-letter">i</span>
+        <span class="loader-letter">n</span>
+        <span class="loader-letter">g</span>
+        <span class="loader-letter">.</span>
+        <span class="loader-letter">.</span>
+        <span class="loader-letter">.</span>
+        <div class="loader"></div>
+      </div>
+    </div>
+
+    <!-- Realistic Water Shader Script -->
+    <script>
+      const container = document.getElementById('webgl-container');
+
+      // Scene, Camera, Renderer
+      const scene = new THREE.Scene();
+      scene.background = new THREE.Color(0x010307);
+      scene.fog = new THREE.FogExp2(0x010307, 0.04);
+
+      const camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 1000);
+      camera.position.set(0, -14, 10);
+      camera.rotation.x = 0.75;
+
+      const renderer = new THREE.WebGLRenderer({ antialias: true });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      container.appendChild(renderer.domElement);
+
+      // High-density Plane Mesh for smooth fluid geometry simulation
+      const geometry = new THREE.PlaneGeometry(45, 45, 120, 120);
+
+      // Reflective water material styled in black and vibrant blue tones
+      const material = new THREE.MeshStandardMaterial({
+        color: 0x001e3d,
+        roughness: 0.15,
+        metalness: 0.9,
+        flatShading: false
+      });
+
+      const waterMesh = new THREE.Mesh(geometry, material);
+      scene.add(waterMesh);
+
+      // Lighting setup to cast deep highlights on water surface peaks
+      const ambientLight = new THREE.AmbientLight(0x001122, 1.5);
+      scene.add(ambientLight);
+
+      const directionalLight = new THREE.DirectionalLight(0x00bfff, 2.5);
+      directionalLight.position.set(0, 10, 15);
+      scene.add(directionalLight);
+
+      const bluePointLight = new THREE.PointLight(0x0088ff, 4, 30);
+      bluePointLight.position.set(0, -5, 5);
+      scene.add(bluePointLight);
+
+      // Raycasting for Mouse Interaction
+      const raycaster = new THREE.Raycaster();
+      const mouse = new THREE.Vector2(-999, -999);
+      const planeIntersectPoint = new THREE.Vector3();
+      const plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
+
+      let targetMouseX = 0;
+      let targetMouseY = 0;
+      let currentMouseX = 0;
+      let currentMouseY = 0;
+
+      // Active ripple dynamic storage container array
+      const ripples = [];
+
+      function triggerRipple(x, y) {
+        ripples.push({
+          x: x,
+          y: y,
+          radius: 0.1,
+          maxRadius: 8.0,
+          life: 1.0 // opacity/strength factor
+        });
+      }
+
+      window.addEventListener('mousemove', (event) => {
+        targetMouseX = (event.clientX / window.innerWidth) * 2 - 1;
+        targetMouseY = -(event.clientY / window.innerHeight) * 2 + 1;
+
+        mouse.x = targetMouseX;
+        mouse.y = targetMouseY;
+
+        raycaster.setFromCamera(mouse, camera);
+        raycaster.ray.intersectPlane(plane, planeIntersectPoint);
+
+        // Create a new ripple trail point on movement
+        triggerRipple(planeIntersectPoint.x, planeIntersectPoint.y);
+      });
+
+      window.addEventListener('touchmove', (event) => {
+        if (event.touches.length > 0) {
+          const touch = event.touches[0];
+          targetMouseX = (touch.clientX / window.innerWidth) * 2 - 1;
+          targetMouseY = -(touch.clientY / window.innerHeight) * 2 + 1;
+
+          mouse.x = targetMouseX;
+          mouse.y = targetMouseY;
+
+          raycaster.setFromCamera(mouse, camera);
+          raycaster.ray.intersectPlane(plane, planeIntersectPoint);
+
+          triggerRipple(planeIntersectPoint.x, planeIntersectPoint.y);
+        }
+      }, { passive: true });
+
+      // Geometry vertex caching for performance
+      const positionAttribute = geometry.attributes.position;
+      const originalZ = [];
+      for (let i = 0; i < positionAttribute.count; i++) {
+        originalZ.push(positionAttribute.getZ(i));
+      }
+
+      const clock = new THREE.Clock();
+
+      // Main Render Loop
+      function animate() {
+        requestAnimationFrame(animate);
+
+        const elapsedTime = clock.getElapsedTime();
+
+        // Smooth out mouse tracking interpolation
+        currentMouseX += (planeIntersectPoint.x - currentMouseX) * 0.1;
+        currentMouseY += (planeIntersectPoint.y - currentMouseY) * 0.1;
+
+        // Update active ripples life and radius
+        for (let i = ripples.length - 1; i >= 0; i--) {
+          let r = ripples[i];
+          r.radius += 0.12; // Spread speed
+          r.life -= 0.02;   // Fade speed
+          if (r.life <= 0 || r.radius >= r.maxRadius) {
+            ripples.splice(i, 1);
+          }
+        }
+
+        // Deform vertices to build natural water behavior
+        for (let i = 0; i < positionAttribute.count; i++) {
+          let x = positionAttribute.getX(i);
+          let y = positionAttribute.getY(i);
+
+          // Realistic rolling ambient wave pattern layers
+          let z = originalZ[i] + 
+                  Math.sin(x * 0.4 + elapsedTime * 2.2) * 0.25 + 
+                  Math.cos(y * 0.4 + elapsedTime * 1.8) * 0.25;
+
+          // Apply multi-point physical ripple deformations from array
+          for (let j = 0; j < ripples.length; j++) {
+            let r = ripples[j];
+            let dx = x - r.x;
+            let dy = y - r.y;
+            let distance = Math.sqrt(dx * dx + dy * dy);
+
+            // Ring interference wave mathematical calculation
+            let waveDist = Math.abs(distance - r.radius);
+            if (waveDist < 1.2) {
+              let factor = Math.cos(waveDist * Math.PI) * 0.5 + 0.5;
+              z += factor * r.life * 0.6;
+            }
+          }
+
+          positionAttribute.setZ(i, z);
+        }
+
+        positionAttribute.needsUpdate = true;
+        geometry.computeVertexNormals();
+
+        // Subtle camera rotation sway tracking mouse position gently
+        camera.position.x += (targetMouseX * 1.5 - camera.position.x) * 0.05;
+        camera.lookAt(0, 0, 0);
+
+        renderer.render(scene, camera);
+      }
+
+      animate();
+
+      // Responsive window adjustments
+      window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      });
+    </script>
+  </body>
+</html>

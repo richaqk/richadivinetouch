@@ -1,0 +1,26 @@
+# Hide .html from URLs
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+  
+  # Remove .html extension
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteCond %{REQUEST_FILENAME}.html -f
+  RewriteRule ^(.+)$ $1.html [L]
+  
+  # Force clean URLs (redirect .html to clean URL)
+  RewriteCond %{THE_REQUEST} ^[A-Z]+\ /[^\.]+\.html[^\ ]*\ 
+  RewriteRule ^(.+)\.html$ /$1 [R=301,L]
+</IfModule>
+
+# Directory indexing
+DirectoryIndex index.html
+
+# MIME types
+AddType text/html .html
+AddType text/css .css
+AddType application/javascript .js
+AddType image/png .png
+AddType image/jpeg .jpg .jpeg
+AddType image/webp .webp
+AddType video/mp4 .mp4

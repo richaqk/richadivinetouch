@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Woven Cloth</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #eccee8;
+        }
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="cloth"></canvas>
+    <script>(() => {
+        const canvas = document.getElementById('cloth');
+        if (!window.THREE) return;
+
+        // Generate Iridescent Woven Silk Texture
+        function makeClothTexture() {
+            const W = 1280, H = 800;
+            const c = document.createElement('canvas');
+            c.width = W;
+            c.height = H;
+            const x = c.getContext('2d');
+
+            // Dark greyish silver base gradient
+            const g = x.createLinearGradient(0, 0, W, H);
+            g.addColorStop(0, '#3a3a3a');
+            g.addColorStop(0.3, '#5e5e5e');
+            g.addColorStop(0.7, '#474747');
+            g.addColorStop(1, '#2b2b2b');
+            x.fillStyle = g;
+            x.fillRect(0, 0, W, H);
+
+            // Elegant dual border framing
+            x.strokeStyle = '#6e6e6e';
+            x.lineWidth = 12;
+            x.strokeRect(50, 50, W-100, H-100);
+            x.lineWidth = 3;
+            x.strokeStyle = '#8f8f8f';
+            x.strokeRect(70, 70, W-140, H-140);
+
+            const tex = new THREE.CanvasTexture(c);
+            tex.anisotropy = 16;
+            tex.colorSpace = THREE.SRGBColorSpace;
+
+            // Load and draw the complete rectangular image inside the borders
+            const img = new Image();
+            img.crossOrigin = "anonymous";
+            img.src = 'images/divine touch pamplate.jpg';
+            img.onload = () => {
+                x.save();
+                const borderOffset = 85;
+                const imgX = borderOffset;
+                const imgY = borderOffset;
+                const imgWidth = W - (borderOffset * 2);
+                const imgHeight = H - (borderOffset * 2);
+
+                x.beginPath();
+                x.rect(imgX, imgY, imgWidth, imgHeight);
+                x.closePath();
+                x.clip();
+
+                x.shadowColor = 'rgba(0, 0, 0, 0.5)';
+                x.shadowBlur = 30;
+                x.drawImage(img, imgX, imgY, imgWidth, imgHeight);
+                x.restore();
+
+                // Fine woven grid texture overlay
+                x.globalAlpha = 0.4;
+                for(let yy=0; yy<H; yy+=4) {
+                    x.strokeStyle = 'rgba(150, 150, 150, 0.5)';
+                    x.lineWidth = 1.5;
+                    x.beginPath();
+                    x.moveTo(0, yy);
+                    x.lineTo(W, yy);
+                    x.stroke();
+                }
+                for(let xx=0; xx<W; xx+=4) {
+                    x.strokeStyle = 'rgba(120, 120, 120, 0.4)';
+                    x.lineWidth = 1.5;
+                    x.beginPath();
+                    x.moveTo(xx, 0);
+                    x.lineTo(xx, H);
+                    x.stroke();
+                }
+
+                // Subtle film grain
+                const id = x.getImageData(0, 0, W, H), d = id.data;
+                for(let i=0; i<d.length; i+=4) {
+                    const n = (Math.random() * 2 - 1) * 14;
+                    d[i] += n;
+                    d[i+1] += n * 0.5;
+                    d[i+2] += n * 1.5;
+                }
+                x.putImageData(id, 0, 0);
+                tex.needsUpdate = true;
+            };
+
+            return tex;
+        }
+
+        // Scene Setup
+        const scene = new THREE.Scene();
+        const renderer = new THREE.WebGLRenderer({
+            canvas: canvas,
+            antialias: true,
+            alpha: true
+        });
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+        let camera;
+        const BW = 9.5, BH = 7.5;
+        const GX = 45, GY = 30;
+        const geo = new THREE.PlaneGeometry(BW, BH, GX, GY);
+
+        const mat = new THREE.MeshPhysicalMaterial({
+            map: makeClothTexture(),
+            side: THREE.DoubleSide,
+            roughness: 0.25,
+            metalness: 0.6,
+            clearcoat: 0.8,
+            clearcoatRoughness: 0.1,
+            transmission: 0.05,
+            ior: 1.5,
+            reflectivity: 1.0,
+            color: 0xffffff
+        });
+
+        const mesh = new THREE.Mesh(geo, mat);
+        scene.add(mesh);
+
+        // Dynamic Atmospheric Colored Lighting
+        scene.add(new THREE.AmbientLight(0xd0d4d8, 1.5));
+        const keyLight = new THREE.DirectionalLight(0xffffff, 2.0);
+        keyLight.position.set(-4, 4, 3);
+        scene.add(keyLight);
+        const rimLight = new THREE.DirectionalLight(0xe5e7eb, 2.5);
+        rimLight.position.set(4, -2, 2.5);
+        scene.add(rimLight);
+        const fillLight = new THREE.DirectionalLight(0xc0c5ce, 1.5);
+        fillLight.position.set(0, 3, 4);
+        scene.add(fillLight);
+
+        // Verlet Physics Simulation
+        const pos = geo.attributes.position;
+        const N = (GX + 1) * (GY + 1);
+        const cur = new Float32Array(N * 3);
+        const prev = new Float32Array(N * 3);
+        const rest = new Float32Array(N * 3);
+        const pinned = new Uint8Array(N);
+
+        for(let i=0; i<N; i++) {
+            const ax = pos.getX(i), ay = pos.getY(i), az = 0;
+            cur[i*3] = prev[i*3] = rest[i*3] = ax;
+            cur[i*3+1] = prev[i*3+1] = rest[i*3+1] = ay;
+            cur[i*3+2] = prev[i*3+2] = rest[i*3+2] = az;
+        }
+
+        // Pin the top edge
+        for(let ix=0; ix<=GX; ix++) {
+            pinned[ix] = 1;
+        }
+
+        const idx = (ix, iy) => ix + iy * (GX + 1);
+        const restH = BW / GX, restV = BH / GY;
+        const GRAV = -2.5, DAMP = 0.988, DT = 0.016;
+
+        function wind(ix, iy, t) {
+            const cx = ix / GX, cy = iy / GY;
+            const travel = t * 2.2 - cy * 3.8;
+            const gust = 0.8 + 0.5 * Math.sin(t * 0.7) + 0.2 * Math.sin(t * 2.1 + 1.1);
+            const amp = 5.2 * cy;
+            const fz = (Math.sin(travel + cx * 3.0) + 0.6 * Math.sin(travel * 1.5 + cx * 5.5)) * amp * gust;
+            const fx = Math.sin(t * 0.8 + cy * 1.8) * 0.7 * cy;
+            const fy = -0.3 * cy;
+            return [fx, fy, fz];
+        }
+
+        function step(t) {
+            for(let iy=0; iy<=GY; iy++) {
+                for(let ix=0; ix<=GX; ix++) {
+                    const i = idx(ix, iy);
+                    if(pinned[i]) continue;
+                    const [fx, fy, fz] = wind(ix, iy, t);
+                    for(let k=0; k<3; k++) {
+                        const j = i * 3 + k;
+                        const a = (k===0 ? fx : k===1 ? (fy+GRAV) : fz);
+                        const v = (cur[j] - prev[j]) * DAMP;
+                        prev[j] = cur[j];
+                        cur[j] = cur[j] + v + a * DT * DT;
+                    }
+                }
+            }
+
+            for(let it=0; it<4; it++) {
+                for(let iy=0; iy<=GY; iy++) {
+                    for(let ix=0; ix<GX; ix++) {
+                        solve(idx(ix,iy), idx(ix+1,iy), restH);
+                    }
+                }
+                for(let iy=0; iy<GY; iy++) {
+                    for(let ix=0; ix<=GX; ix++) {
+                        solve(idx(ix,iy), idx(ix,iy+1), restV);
+                    }
+                }
+            }
+
+            for(let ix=0; ix<=GX; ix++) {
+                const i = ix;
+                cur[i*3] = rest[i*3];
+                cur[i*3+1] = rest[i*3+1];
+                cur[i*3+2] = rest[i*3+2];
+                prev[i*3] = rest[i*3];
+                prev[i*3+1] = rest[i*3+1];
+                prev[i*3+2] = rest[i*3+2];
+            }
+        }
+
+        function solve(a, b, rl) {
+            const ax = cur[a*3], ay = cur[a*3+1], az = cur[a*3+2];
+            const bx = cur[b*3], by = cur[b*3+1], bz = cur[b*3+2];
+            let dx = bx - ax, dy = by - ay, dz = bz - az;
+            const d = Math.sqrt(dx*dx + dy*dy + dz*dz) || 1e-6;
+            const diff = (d - rl) / d * 0.5;
+            dx *= diff;
+            dy *= diff;
+            dz *= diff;
+            const pa = pinned[a], pb = pinned[b];
+            if(!pa && !pb) {
+                cur[a*3] += dx;
+                cur[a*3+1] += dy;
+                cur[a*3+2] += dz;
+                cur[b*3] -= dx;
+                cur[b*3+1] -= dy;
+                cur[b*3+2] -= dz;
+            } else if(pa && !pb) {
+                cur[b*3] -= dx*2;
+                cur[b*3+1] -= dy*2;
+                cur[b*3+2] -= dz*2;
+            } else if(!pa && pb) {
+                cur[a*3] += dx*2;
+                cur[a*3+1] += dy*2;
+                cur[a*3+2] += dz*2;
+            }
+        }
+
+        function commit() {
+            for(let i=0; i<N; i++) {
+                pos.setXYZ(i, cur[i*3], cur[i*3+1], cur[i*3+2]);
+            }
+            pos.needsUpdate = true;
+            geo.computeVertexNormals();
+        }
+
+        function fit() {
+            const w = window.innerWidth;
+            const h = window.innerHeight;
+            renderer.setSize(w, h, false);
+            const aspect = w / h;
+            camera = new THREE.PerspectiveCamera(40, aspect, 0.1, 100);
+            const vFit = (BH/2) / Math.tan(40 * Math.PI / 360);
+            const hFit = (BW/2) / Math.tan(40 * Math.PI / 360) / aspect;
+            camera.position.set(0, 0.8, Math.max(vFit, hFit) * 1.15 + 0.3);
+            camera.lookAt(0, 0, 0);
+        }
+
+        window.addEventListener('resize', fit);
+        fit();
+
+        let running = true, t = 0;
+
+        function loop() {
+            if(!running) return;
+            t += DT;
+            step(t);
+            commit();
+            renderer.render(scene, camera);
+            requestAnimationFrame(loop);
+        }
+
+        for(let s=0; s<50; s++) step(s*DT);
+        t = 50 * DT;
+        loop();
+
+        document.addEventListener('visibilitychange', () => {
+            running = !document.hidden;
+            if(running) loop();
+        });
+    })();
+
+</script>
+</body>
+</html>
