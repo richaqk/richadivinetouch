@@ -892,8 +892,8 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
-            transform: scale(calc(1.04 + (1 - var(--focus)) * 0.06));
-            filter: sepia(calc((1 - var(--focus)) * 0.24)) saturate(calc(0.66 + var(--focus) * 0.34)) contrast(1.04);
+            /* Reduced blur effect - sharper images in filmstrip */
+            filter: sepia(calc((1 - var(--focus)) * 0.12)) saturate(calc(0.8 + var(--focus) * 0.2)) contrast(1.04);
         }
         .card-footer {
             position: absolute;
@@ -2728,15 +2728,15 @@ img {
       };
 
       const profiles = [
-        ["RICHA", "DIVINE TOUCH", "images/_Bihar Beauty Expo ✨ Creating magic with my gorgeous model ❤️_ _rittika_singh_rathore__Clicked by_-_royalshoot80 __beautyexpo _model _bride _bridalsho.jpeg"],
-        ["RICHA", "DIVINE TOUCH", "images/From being my most favourite makeup artist to my most humble sister_ now it_s time to say _ _Babul ki duwaayein leti jaa_ jaa tujhko sukhi sansaar mile. Ma(.webp"],
-        ["RICHA DIVINE TOUCH", "BRIDE MAKEUP", "images/Makeup by_- _divinetouch.by.richa _In frame_- _akaisha.official _Movie_- _andaaz2__bollywood _bollywoodsongs _makeup _makeupartist _viral _trending _nadeem (.jpg.jpeg"],
-        ["DIVINE TOUCH", "GLAM LOOK", "images/👑 A bride. A model. A dream come true. 👑_At the Makeup Expo_ Gyan Bhawan_ _divinetouch.by.richa created magic with her flawless bridal makeup 💄✨_3.jpg.jpeg"],
-        ["RICHA", "EDITORIAL", "images/👑 A bride. A model. A dream come true. 👑_At the Makeup Expo_ Gyan Bhawan_ _divinetouch.by.richa created magic with her flawless bridal makeup 💄_11.jpg.jpeg"],
-        ["DIVINE TOUCH", "BRIDAL", "images/Makeup by_- _divinetouch.by.richa _In frame_- _akaisha.official _Movie_- _andaaz2__bollywood _bollywoodsongs _makeup _makeupartist _viral _trending _nadeem_1.jpg.jpeg"],
-        ["RICHA DIVINE TOUCH", "WEDDING", "images/👑 A bride. A model. A dream come true. 👑_At the Makeup Expo_ Gyan Bhawan_ _divinetouch.by.richa created magic with her flawless bridal makeup 💄_15.jpg.jpeg"],
-        ["RICHA", "MAKUP ARTIST", "images/Makeup by_- _divinetouch.by.richa _In frame_- _akaisha.official _Movie_- _andaaz2__bollywood _bollywoodsongs _makeup _makeupartist _viral _trending _nadeem_2.jpg.jpeg"],
-        ["DIVINE TOUCH", "PATNA", "images/💕 Love isn_t in the air....It is in the hair 🙋__makeuplook _hairdresser _weddingphotography _weddingmakeup _viralpost _explore _explorepage✨(JPG).jpg.jpeg"]
+        ["BRIDAL LOOK", "RICHA DIVINE TOUCH", "images/_Bihar Beauty Expo ✨ Creating magic with my gorgeous model ❤️_ _rittika_singh_rathore__Clicked by_-_royalshoot80 __beautyexpo _model _bride _bridalsho.jpeg"],
+        ["BRIDAL LOOK", "RICHA DIVINE TOUCH", "images/From being my most favourite makeup artist to my most humble sister_ now it_s time to say _ _Babul ki duwaayein leti jaa_ jaa tujhko sukhi sansaar mile. Ma(.webp"],
+        ["GLAM LOOK", "RICHA DIVINE TOUCH", "images/Makeup by_- _divinetouch.by.richa _In frame_- _akaisha.official _Movie_- _andaaz2__bollywood _bollywoodsongs _makeup _makeupartist _viral _trending _nadeem (.jpg.jpeg"],
+        ["BRIDAL LOOK", "RICHA DIVINE TOUCH", "images/👑 A bride. A model. A dream come true. 👑_At the Makeup Expo_ Gyan Bhawan_ _divinetouch.by.richa created magic with her flawless bridal makeup 💄✨_3.jpg.jpeg"],
+        ["BRIDAL LOOK", "RICHA DIVINE TOUCH", "images/👑 A bride. A model. A dream come true. 👑_At the Makeup Expo_ Gyan Bhawan_ _divinetouch.by.richa created magic with her flawless bridal makeup 💄_11.jpg.jpeg"],
+        ["EDITORIAL LOOK", "RICHA DIVINE TOUCH", "images/Makeup by_- _divinetouch.by.richa _In frame_- _akaisha.official _Movie_- _andaaz2__bollywood _bollywoodsongs _makeup _makeupartist _viral _trending _nadeem_1.jpg.jpeg"],
+        ["BRIDAL LOOK", "RICHA DIVINE TOUCH", "images/👑 A bride. A model. A dream come true. 👑_At the Makeup Expo_ Gyan Bhawan_ _divinetouch.by.richa created magic with her flawless bridal makeup 💄_15.jpg.jpeg"],
+        ["BOLD GLAM LOOK", "RICHA DIVINE TOUCH", "images/Makeup by_- _divinetouch.by.richa _In frame_- _akaisha.official _Movie_- _andaaz2__bollywood _bollywoodsongs _makeup _makeupartist _viral _trending _nadeem_2.jpg.jpeg"],
+        ["BRIDAL LOOK", "RICHA DIVINE TOUCH", "images/💕 Love isn_t in the air....It is in the hair 🙋__makeuplook _hairdresser _weddingphotography _weddingmakeup _viralpost _explore _explorepage✨(JPG).jpg.jpeg"]
       ].map(([name, role, portrait]) => ({ name, role, portrait }));
 
       const stage = document.querySelector("#stage");
@@ -2786,8 +2786,10 @@ img {
       }
 
       function moveTo(index) {
+        // Clamp index to valid range
+        const clampedIndex = Math.max(0, Math.min(index, count - 1));
         const current = nearestIndex();
-        let delta = index - current;
+        let delta = clampedIndex - current;
         if (delta > count / 2) delta -= count;
         if (delta < -count / 2) delta += count;
         state.base += delta;
@@ -2808,7 +2810,15 @@ img {
         state.pointerX = nx;
         state.pointerY = ny;
         state.active = true;
-        state.target = state.base + (innerWidth < 650 ? ny * 2.2 : nx * 3.1);
+        
+        // Calculate target with bounds
+        let targetOffset = innerWidth < 650 ? ny * 2.2 : nx * 3.1;
+        let newTarget = state.base + targetOffset;
+        
+        // Clamp target to valid range [0, count-1]
+        newTarget = Math.max(0, Math.min(newTarget, count - 1));
+        
+        state.target = newTarget;
         state.lastInput = performance.now();
         stage.style.setProperty("--pointer-x", `${(nx + 1) * 50}%`);
       });
@@ -2822,16 +2832,20 @@ img {
       });
 
       stage.addEventListener("wheel", (event) => {
-        // If the user is scrolling vertically more than horizontally, 
-        // let the page scroll naturally so they don't get stuck!
+        // Only handle horizontal scroll - allow vertical scroll to pass through to page
         if (Math.abs(event.deltaY) > Math.abs(event.deltaX)) {
-            return; // Don't preventDefault, allow page to scroll down
+            return; // Let page scroll naturally
         }
         
+        // For horizontal scroll, prevent default and handle filmstrip movement
         event.preventDefault();
         const direction = Math.sign(event.deltaX);
         if (!direction) return;
+        
+        // Update base but keep it within bounds using modulo
         state.base += direction;
+        // Clamp base to valid range [0, count-1]
+        state.base = ((state.base % count) + count) % count;
         state.target = state.base;
         state.active = false;
         state.lastInput = performance.now();
@@ -2842,7 +2856,10 @@ img {
         const backward = event.key === "ArrowLeft" || event.key === "ArrowUp";
         if (!forward && !backward) return;
         event.preventDefault();
+        
         state.base += forward ? 1 : -1;
+        // Clamp base to valid range using modulo to prevent getting stuck
+        state.base = ((state.base % count) + count) % count;
         state.target = state.base;
         state.active = false;
         state.lastInput = performance.now();
@@ -2889,7 +2906,8 @@ img {
           card.style.setProperty("--focus", focus.toFixed(4));
           card.style.zIndex = String(Math.round(1000 - distance * 100));
           card.style.opacity = String(Math.max(0.13, side * 0.76 + focus * 0.24));
-          card.style.filter = `blur(${Math.max(0, distance - 1.5) * 0.38}px)`;
+          // Reduced blur effect - sharper images in filmstrip
+          card.style.filter = `blur(${Math.max(0, distance - 1.5) * 0.15}px)`;
           card.style.transform = [
             "translate(-50%, -50%)",
             `translate3d(${x.toFixed(2)}px, ${y.toFixed(2)}px, ${z.toFixed(2)}px)`,
@@ -2911,21 +2929,41 @@ img {
 
   
 <script>
-    // Auto-play videos on page load - each video controls itself
+    // Improved video autoplay - handles mobile browser restrictions better
     const musicVideos = document.querySelectorAll('.phone-video');
     
-    musicVideos.forEach((video, index) => {
-        // Video controls itself - no global state interference
+    // Helper function to safely play a video
+    function playVideoSafely(video) {
+        if (!video) return;
+        
+        // Mute first (required for autoplay)
         video.muted = true;
         
-        // Attempt to play each video independently
+        // Try to play
         video.play().then(() => {
             video.classList.add('loaded');
             video.dataset.playing = "true";
         }).catch(error => {
-            console.log(`Video ${index + 1} autoplay blocked or failed:`, error);
+            // If play fails, set playing=false but try again on interaction
             video.dataset.playing = "false";
+            // Add click-to-play functionality for failed videos
+            video.addEventListener('click', function() {
+                if (video.dataset.playing === "false") {
+                    video.play().then(() => {
+                        video.dataset.playing = "true";
+                        video.classList.add('loaded');
+                    }).catch(() => {});
+                }
+            }, { once: true });
         });
+    }
+    
+    musicVideos.forEach((video, index) => {
+        // Set preload to "auto" for better mobile performance
+        video.preload = "auto";
+        
+        // Attempt to play each video independently
+        playVideoSafely(video);
         
         // Handle video state changes
         video.addEventListener('play', () => {
@@ -2944,6 +2982,21 @@ img {
         video.addEventListener('error', (e) => {
             console.error('Video error:', e, video.src);
         });
+        
+        // On mobile, restart video when it enters viewport (fixes scrolling pause issue)
+        if ('IntersectionObserver' in window) {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        // Video is visible, try to ensure it's playing
+                        if (video.dataset.playing === "false" && !video.paused) {
+                            video.play().catch(() => {});
+                        }
+                    }
+                });
+            }, { threshold: 0.1 });
+            observer.observe(video);
+        }
     });
     
     // FIXED: Each phone video controls only itself - no global mute state
@@ -2960,9 +3013,16 @@ img {
             btn.classList.add('active');
             btn.classList.remove('muted');
             
-            // Ensure video keeps playing when unmuted (mobile fix)
-            video.play().catch(error => {
-                console.log("Playback resumed:", error);
+            // On mobile, ensure video keeps playing when unmuted
+            // Use both play() and then mute/unmute to force playback
+            video.play().then(() => {
+                video.dataset.playing = "true";
+                video.classList.add('loaded');
+            }).catch(error => {
+                // If play fails on mobile, try again with a small delay
+                setTimeout(() => {
+                    video.play().catch(() => {});
+                }, 100);
             });
         } else {
             video.muted = true;
