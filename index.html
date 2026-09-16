@@ -2741,6 +2741,17 @@ img {
 
       const stage = document.querySelector("#stage");
       const deck = document.querySelector("#deck");
+      
+      // Helper function to safely encode image paths for GitHub Pages
+      function encodeImagePath(path) {
+        try {
+          // Replace spaces with %20, handle special characters
+          return path.replace(/ /g, '%20').replace(/[()]/g, '%28').replace(/[^a-zA-Z0-9._~:/?#\[\]@!$&'()*+,;=-]/g, encodeURIComponent);
+        } catch (e) {
+          return path;
+        }
+      }
+      
       const cards = profiles.map((profile, index) => {
         const card = document.createElement("button");
         card.className = "card";
@@ -2749,7 +2760,7 @@ img {
         card.setAttribute("aria-label", `Focus ${profile.name}, ${profile.role}`);
         card.innerHTML = `
           <span class="portrait">
-            <img src="${profile.portrait}" alt="${profile.name}">
+            <img src="${encodeImagePath(profile.portrait)}" alt="${profile.name}">
           </span>
           <span class="card-footer">
             <span class="index">${String(index + 1).padStart(2, "0")}</span>
