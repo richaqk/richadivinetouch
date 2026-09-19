@@ -130,6 +130,29 @@
             --transition: 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
         }
 
+        /* Slogan shine animation */
+        @keyframes shine {
+            0% {
+                background-position: 0;
+            }
+            100% {
+                background-position: 400px;
+            }
+        }
+
+        .hero-slogan-shine {
+            background: linear-gradient(to right, #b8956e 0%, #ffffff 25%, #b8956e 50%);
+            background-size: 400px 100%;
+            background-position: 0;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: shine 5s infinite linear;
+            animation-fill-mode: forwards;
+            -webkit-text-size-adjust: none;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
         html {
             scroll-behavior: smooth;
         }
@@ -843,6 +866,94 @@
             pointer-events: none;
             background: linear-gradient(90deg, rgba(84, 58, 29, 0.19), transparent 14%, transparent 86%, rgba(84, 58, 29, 0.19));
         }
+        .filmstrip-navigation {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            width: 100%;
+            transform: translateY(-50%);
+            display: flex;
+            justify-content: space-between;
+            pointer-events: none;
+            z-index: 10;
+            padding: 0 20px;
+            align-items: center;
+        }
+        .nav-btn {
+            pointer-events: auto;
+            background: linear-gradient(135deg, rgba(243, 218, 241, 0.85) 0%, rgba(235, 210, 233, 0.7) 100%);
+            border: 2px solid rgba(47, 34, 19, 0.3);
+            border-radius: 8px;
+            padding: 12px 35px;
+            font-size: 18px;
+            color: #2d241a;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            font-family: var(--font-sans);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            box-shadow: 0 2px 8px rgba(47, 34, 19, 0.1);
+        }
+        .nav-btn:hover {
+            background: linear-gradient(135deg, rgba(207, 184, 207, 0.95) 0%, rgba(200, 175, 200, 0.85) 100%);
+            border-color: rgba(47, 34, 19, 0.5);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(47, 34, 19, 0.2);
+        }
+        .nav-btn::after {
+            content: "";
+            position: absolute;
+            top: 0; left: -100%;
+            width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent);
+            transition: left 0.5s ease;
+            pointer-events: none;
+            border-radius: 8px;
+        }
+        .nav-btn:hover::after {
+            left: 100%;
+        }
+        .nav-btn:active {
+            transform: translateY(-1px);
+            box-shadow: 0 3px 12px rgba(47, 34, 19, 0.15);
+        }
+        .nav-btn svg {
+            width: 20px;
+            height: 20px;
+            fill: currentColor;
+            transition: transform 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        .pixel-canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+            pointer-events: none;
+        }
+        .pixel-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            margin: auto;
+            aspect-ratio: 1;
+            background: radial-gradient(circle, rgba(200, 200, 200, 0.4), transparent 85%);
+            opacity: 0;
+            transition: opacity 800ms cubic-bezier(0.5, 1, 0.89, 1);
+            pointer-events: none;
+            z-index: 2;
+        }
+        .pixel-card:hover::before,
+        .pixel-card:focus-within::before {
+            opacity: 1;
+        }
         .deck {
             position: absolute;
             inset: 0;
@@ -1553,12 +1664,15 @@
             .contact-section-container { flex-direction: column; gap: 30px; }
             .new-contact-image-card { margin-left: 0; transform: translateY(0); }
             .new-contact-image-card img { max-height: 450px; }
+            .filmstrip-navigation { padding: 0 15px; }
+            .nav-btn { padding: 10px 28px; font-size: 16px; }
         }
 
         /* ── ≤ 768px — iPad Mini / Surface Pro (approx) ── */
         @media (max-width: 768px) {
             .hero-subtitle { font-size: 1.1rem; }
             .hero-manifesto { font-size: 1.05rem; }
+            .nav-btn { padding: 10px 24px; font-size: 15px; }
         }
 
         /* ── ≤ 600px — large phones / foldables / Surface Duo ── */
@@ -1606,6 +1720,8 @@
             .hero-manifesto { font-size: 0.9rem; }
             .nav-left a, .nav-right a { font-size: 0.5rem; }
             .phone { width: 150px; height: 280px; }
+            .filmstrip-navigation { padding: 0 12px; }
+            .nav-btn { padding: 8px 20px; font-size: 14px; }
         }
 
         /* ── ≤ 374px — iPhone SE, Galaxy A-series, small Androids ── */
@@ -1840,7 +1956,7 @@
         }
         #loading-overlay .center-container {
             position: absolute;
-            top: 50%; left: 50%;
+            top: 45%; left: 50%;
             transform: translate(-50%, -50%);
             z-index: 10;
             pointer-events: none;
@@ -1848,22 +1964,41 @@
         #loading-overlay .loader-wrapper {
             position: relative;
             display: flex;
+            flex-direction: column;
             align-items: center;
-            justify-content: center;
-            height: 120px;
+            justify-content: flex-start;
+            height: auto;
             width: auto;
-            margin: 2rem;
+            margin: 0;
+            padding-top: 0;
             font-size: 1.6em;
             font-weight: 600;
             user-select: none;
             color: #fff;
             scale: 2;
         }
+        #loading-overlay .loader-logo {
+            width: 120px;
+            height: auto;
+            margin-bottom: 0.6rem;
+            object-fit: contain;
+            animation: fadeIn 1.5s ease-out;
+        }
+        #loading-overlay .loader-text {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 0.1rem;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1); }
+        }
         #loading-overlay .loader {
             position: absolute;
-            top: 0; left: 0;
-            height: 100%; width: 100%;
-            z-index: 1;
+            top: 60%; left: 0;
+            width: 100%; height: 100%;
+            z-index: 0;
             background-color: transparent;
             mask: repeating-linear-gradient(90deg, transparent 0, transparent 6px, black 7px, black 8px);
             -webkit-mask: repeating-linear-gradient(90deg, transparent 0, transparent 6px, black 7px, black 8px);
@@ -1871,7 +2006,7 @@
         #loading-overlay .loader::after {
             content: "";
             position: absolute;
-            top: 0; left: 0;
+            top: -20%; left: 0;
             width: 100%; height: 100%;
             background-image: radial-gradient(circle at 50% 50%, #00e1ff 0%, transparent 50%),
               radial-gradient(circle at 45% 45%, #0044cc 0%, transparent 45%),
@@ -2070,16 +2205,19 @@ img {
         <div id="webgl-container"></div>
         <div class="center-container">
             <div class="loader-wrapper">
-                <span class="loader-letter">L</span>
-                <span class="loader-letter">o</span>
-                <span class="loader-letter">a</span>
-                <span class="loader-letter">d</span>
-                <span class="loader-letter">i</span>
-                <span class="loader-letter">n</span>
-                <span class="loader-letter">g</span>
-                <span class="loader-letter">.</span>
-                <span class="loader-letter">.</span>
-                <span class="loader-letter">.</span>
+                <img src="images/divinetouch logo.png" alt="Richa Divine Touch" class="loader-logo">
+                <div class="loader-text">
+                    <span class="loader-letter">L</span>
+                    <span class="loader-letter">o</span>
+                    <span class="loader-letter">a</span>
+                    <span class="loader-letter">d</span>
+                    <span class="loader-letter">i</span>
+                    <span class="loader-letter">n</span>
+                    <span class="loader-letter">g</span>
+                    <span class="loader-letter">.</span>
+                    <span class="loader-letter">.</span>
+                    <span class="loader-letter">.</span>
+                </div>
                 <div class="loader"></div>
             </div>
         </div>
@@ -2242,15 +2380,13 @@ img {
         <p class="hero-subtitle">Touch of Grace &bull; Bridal &bull; Glam &bull; Editorial</p>
         
         <!-- ✦ BRAND SLOGAN ✦ -->
-        <p class="hero-slogan" style="
+        <p class="hero-slogan hero-slogan-shine" style="
             font-family: var(--font-serif);
             font-size: clamp(1.1rem, 1.8vw, 1.5rem);
             font-weight: 600;
-            color: var(--color-gold);
             letter-spacing: 0.06em;
             margin-top: -0.4rem;
             margin-bottom: 1.2rem;
-            text-shadow: 0 1px 4px rgba(184, 149, 110, 0.15);
         ">
             ✦ Har dulhan ko banaye divine &amp; confident ✦
         </p>
@@ -2299,6 +2435,14 @@ img {
         <main class="stage" id="stage" aria-label="Interactive editorial character filmstrip">
             <h1 class="sr-only">Character Filmstrip</h1>
             <p class="sr-only">Move, scroll, or use the arrow keys to browse the portraits.</p>
+            <div class="filmstrip-navigation">
+                <button id="filmstrip-prev" class="nav-btn left-btn" aria-label="Previous image">
+                   <svg viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+                </button>
+                <button id="filmstrip-next" class="nav-btn right-btn" aria-label="Next image">
+                   <svg viewBox="0 0 24 24"><path d="M8.59 16.59L10 18l6-6-6-6-1.41 1.41L13.17 12z"/></svg>
+                </button>
+            </div>
             <div class="deck" id="deck" data-testid="filmstrip"></div>
         </main>
 
@@ -2742,13 +2886,142 @@ img {
       const stage = document.querySelector("#stage");
       const deck = document.querySelector("#deck");
       
+      class Pixel {
+        constructor(canvas, context, x, y, color, speed, delay) {
+          this.width = canvas.width;
+          this.height = canvas.height;
+          this.ctx = context;
+          this.x = x;
+          this.y = y;
+          this.color = color;
+          this.speed = this.getRandomValue(0.1, 0.9) * speed;
+          this.size = 0;
+          this.sizeStep = Math.random() * 0.4;
+          this.minSize = 0.5;
+          this.maxSizeInteger = 2;
+          this.maxSize = this.getRandomValue(this.minSize, this.maxSizeInteger);
+          this.delay = delay;
+          this.counter = 0;
+          this.counterStep = Math.random() * 4 + (this.width + this.height) * 0.01;
+          this.isIdle = false;
+          this.isReverse = false;
+          this.isShimmer = false;
+        }
+        getRandomValue(min, max) { return Math.random() * (max - min) + min; }
+        draw() {
+          const centerOffset = this.maxSizeInteger * 0.5 - this.size * 0.5;
+          this.ctx.fillStyle = this.color;
+          this.ctx.fillRect(this.x + centerOffset, this.y + centerOffset, this.size, this.size);
+        }
+        appear() {
+          this.isIdle = false;
+          if (this.counter <= this.delay) {
+            this.counter += this.counterStep;
+            return;
+          }
+          if (this.size >= this.maxSize) { this.isShimmer = true; }
+          if (this.isShimmer) { this.shimmer(); } else { this.size += this.sizeStep; }
+          this.draw();
+        }
+        disappear() {
+          this.isShimmer = false;
+          this.counter = 0;
+          if (this.size <= 0) { this.isIdle = true; return; } else { this.size -= 0.1; }
+          this.draw();
+        }
+        shimmer() {
+          if (this.size >= this.maxSize) { this.isReverse = true; } else if (this.size <= this.minSize) { this.isReverse = false; }
+          if (this.isReverse) { this.size -= this.speed; } else { this.size += this.speed; }
+        }
+      }
+
+      function getEffectiveSpeed(value, reducedMotion) {
+        const min = 0; const max = 100; const throttle = 0.001; const parsed = parseInt(value, 10);
+        if (parsed <= min || reducedMotion) { return min; } else if (parsed >= max) { return max * throttle; } else { return parsed * throttle; }
+      }
+
+      function initPixelCanvas(canvasElement) {
+        const ctx = canvasElement.getContext('2d');
+        const gap = 5;
+        const speed = 35;
+        const colors = "#f8fafc,#f1f5f9,#cbd5e1".split(',');
+        const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        let pixels = [];
+        let animation = null;
+        let isHovered = false;
+
+        const initPixels = () => {
+          const rect = canvasElement.getBoundingClientRect();
+          const width = rect.width;
+          const height = rect.height;
+          canvasElement.width = width;
+          canvasElement.height = height;
+          pixels = [];
+          for (let x = 0; x < width; x += gap) {
+            for (let y = 0; y < height; y += gap) {
+              const color = colors[Math.floor(Math.random() * colors.length)];
+              const dx = x - width / 2;
+              const dy = y - height / 2;
+              const distance = Math.sqrt(dx * dx + dy * dy);
+              pixels.push(new Pixel(canvasElement, ctx, x, y, color, getEffectiveSpeed(speed, reducedMotion), distance));
+            }
+          }
+        };
+
+        const doAnimate = () => {
+          if (!isHovered) {
+            ctx.clearRect(0, 0, canvasElement.width, canvasElement.height);
+            let allIdle = true;
+            for (let i = 0; i < pixels.length; i++) {
+              pixels[i].disappear();
+              if (!pixels[i].isIdle) allIdle = false;
+            }
+            if (allIdle) {
+              cancelAnimationFrame(animation);
+              return;
+            }
+          } else {
+            ctx.clearRect(0, 0, canvasElement.width, canvasElement.height);
+            for (let i = 0; i < pixels.length; i++) {
+              pixels[i].appear();
+            }
+          }
+          animation = requestAnimationFrame(doAnimate);
+        };
+
+        const handleAnimation = (name) => {
+          if (name === "hover") {
+            isHovered = true;
+            if (!animation) {
+              animation = requestAnimationFrame(doAnimate);
+            }
+          } else if (name === "leave") {
+            isHovered = false;
+          }
+        };
+
+        setTimeout(() => {
+          initPixels();
+          window.addEventListener('resize', initPixels);
+        }, 100);
+
+        const card = canvasElement.closest('.card');
+        if (card) {
+          card.addEventListener("mouseenter", () => handleAnimation("hover"));
+          card.addEventListener("mouseleave", () => handleAnimation("leave"));
+          card.addEventListener("focus", () => handleAnimation("hover"));
+          card.addEventListener("blur", () => handleAnimation("leave"));
+        }
+      }
+
       const cards = profiles.map((profile, index) => {
         const card = document.createElement("button");
-        card.className = "card";
+        card.className = "card pixel-card";
         card.type = "button";
         card.dataset.index = String(index);
         card.setAttribute("aria-label", `Focus ${profile.name}, ${profile.role}`);
         card.innerHTML = `
+          <canvas class="pixel-canvas"></canvas>
           <span class="portrait">
             <img src="${profile.portrait}" alt="${profile.name}">
           </span>
@@ -2760,18 +3033,21 @@ img {
             </span>
           </span>`;
         deck.append(card);
+        setTimeout(() => {
+           const canvas = card.querySelector('.pixel-canvas');
+           if (canvas) initPixelCanvas(canvas);
+        }, 0);
         return card;
       });
 
       const count = cards.length;
       const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
       const state = {
-        phase: 3,
-        target: 3,
-        base: 3,
+        phase: 0,
+        target: 0,
+        base: 0,
         pointerX: 0,
         pointerY: 0,
-        active: false,
         lastInput: performance.now()
       };
 
@@ -2787,49 +3063,14 @@ img {
       }
 
       function moveTo(index) {
-        // Clamp index to valid range
-        const clampedIndex = Math.max(0, Math.min(index, count - 1));
-        const current = nearestIndex();
-        let delta = clampedIndex - current;
-        if (delta > count / 2) delta -= count;
-        if (delta < -count / 2) delta += count;
-        state.base += delta;
-        state.target = state.base;
-        state.active = false;
-        state.lastInput = performance.now();
+        // Instant move to the target index
+        state.base = index;
+        resetAutoSlide();
       }
 
       cards.forEach((card, index) => {
         card.addEventListener("click", () => moveTo(index));
         card.addEventListener("focus", () => moveTo(index));
-      });
-
-      stage.addEventListener("pointermove", (event) => {
-        const rect = stage.getBoundingClientRect();
-        const nx = Math.max(-1, Math.min(1, ((event.clientX - rect.left) / rect.width - 0.5) * 2));
-        const ny = Math.max(-1, Math.min(1, ((event.clientY - rect.top) / rect.height - 0.5) * 2));
-        state.pointerX = nx;
-        state.pointerY = ny;
-        state.active = true;
-        
-        // Calculate target with bounds
-        let targetOffset = innerWidth < 650 ? ny * 2.2 : nx * 3.1;
-        let newTarget = state.base + targetOffset;
-        
-        // Clamp target to valid range [0, count-1]
-        newTarget = Math.max(0, Math.min(newTarget, count - 1));
-        
-        state.target = newTarget;
-        state.lastInput = performance.now();
-        stage.style.setProperty("--pointer-x", `${(nx + 1) * 50}%`);
-      });
-
-      stage.addEventListener("pointerleave", () => {
-        state.active = false;
-        state.pointerX = 0;
-        state.pointerY = 0;
-        state.target = state.base;
-        stage.style.setProperty("--pointer-x", "50%");
       });
 
       // Mobile touch support for filmstrip scrolling
@@ -2856,14 +3097,12 @@ img {
         
         // Clamp base to valid range [0, count-1]
         state.base = ((newBase % count) + count) % count;
-        state.target = state.base;
-        state.active = true;
-        state.lastInput = performance.now();
+        resetAutoSlide();
       }, { passive: false });
 
       stage.addEventListener("touchend", () => {
         isTouching = false;
-        state.active = false;
+        resetAutoSlide();
       });
 
       stage.addEventListener("wheel", (event) => {
@@ -2881,9 +3120,7 @@ img {
         state.base += direction;
         // Clamp base to valid range [0, count-1]
         state.base = ((state.base % count) + count) % count;
-        state.target = state.base;
-        state.active = false;
-        state.lastInput = performance.now();
+        resetAutoSlide();
       }, { passive: false });
 
       addEventListener("keydown", (event) => {
@@ -2895,24 +3132,43 @@ img {
         state.base += forward ? 1 : -1;
         // Clamp base to valid range using modulo to prevent getting stuck
         state.base = ((state.base % count) + count) % count;
-        state.target = state.base;
-        state.active = false;
-        state.lastInput = performance.now();
+        resetAutoSlide();
       });
 
       let previousTime = performance.now();
 
+      // Auto slide show variables
+      let autoSlideTimer = null;
+      let isAutoPlaying = false;
+
+      function resetAutoSlide() {
+        if (autoSlideTimer) clearTimeout(autoSlideTimer);
+        isAutoPlaying = false;
+        if (cards.length > 0) {
+          // Restart auto-play after 3 seconds of inactivity
+          autoSlideTimer = setTimeout(() => {
+            if (!isAutoPlaying) {
+              isAutoPlaying = true;
+              state.base = ((state.base + 1) % count + count) % count;
+              resetAutoSlide();
+            }
+          }, 3000);
+        }
+      }
+
       function render(time) {
         const deltaTime = Math.min(32, time - previousTime);
         previousTime = time;
-        const ease = reducedMotion ? 1 : 1 - Math.pow(0.001, deltaTime / 1000);
+        // Very fast interpolation for instant response
+        const ease = reducedMotion ? 1 : 0.4;
 
-        if (!state.active && time - state.lastInput > 3600) {
-          const idle = time - state.lastInput - 3600;
-          state.target = state.base + Math.sin(idle * 0.00042) * 2.45;
+        // Always move toward base - instant response
+        state.phase += (state.base - state.phase) * ease;
+
+        // Snap when close enough to avoid micro-movements
+        if (Math.abs(state.phase - state.base) < 0.02) {
+          state.phase = state.base;
         }
-
-        state.phase += (state.target - state.phase) * ease;
         const compact = innerWidth < 650;
         const activeIndex = nearestIndex();
         const horizontalSpacing = Math.min(168, Math.max(112, innerWidth * 0.116));
@@ -2957,6 +3213,31 @@ img {
         requestAnimationFrame(render);
       }
 
+      // Navigation buttons logic - instant
+      const prevBtn = document.getElementById('filmstrip-prev');
+      const nextBtn = document.getElementById('filmstrip-next');
+      
+      if (prevBtn) {
+        prevBtn.addEventListener('click', () => {
+          state.base = ((state.base - 1) % count + count) % count;
+          resetAutoSlide();
+        });
+      }
+      if (nextBtn) {
+        nextBtn.addEventListener('click', () => {
+          state.base = ((state.base + 1) % count + count) % count;
+          resetAutoSlide();
+        });
+      }
+
+      // Reset auto-play on any user interaction
+      stage.addEventListener('touchstart', resetAutoSlide, { passive: true });
+      stage.addEventListener('wheel', resetAutoSlide, { passive: true });
+      window.addEventListener('keydown', resetAutoSlide);
+
+      // Start auto-play timer
+      resetAutoSlide();
+
       requestAnimationFrame(render);
     })();
     
@@ -2994,11 +3275,16 @@ img {
     }
     
     musicVideos.forEach((video, index) => {
-        // Set preload to "auto" for better mobile performance
-        video.preload = "auto";
+        // Set preload to "metadata" for better memory management
+        video.preload = "metadata";
         
-        // Attempt to play each video independently
-        playVideoSafely(video);
+        // Staggered start to prevent all videos playing simultaneously
+        // Add small random delay to prevent perfect sync when looping
+        const randomOffset = Math.random() * 2000; // 0-2 seconds random delay
+        const staggerDelay = index * 2000 + randomOffset; // 2 seconds between each video + random offset
+        setTimeout(() => {
+            playVideoSafely(video);
+        }, staggerDelay);
         
         // Handle video state changes
         video.addEventListener('play', () => {
