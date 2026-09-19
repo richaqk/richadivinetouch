@@ -2,3 +2,6 @@ User-agent: *
 Allow: /
 
 Sitemap: https://richadivinetouch.in/sitemap.xml
+
+# Favicon
+Allow: /images/favicon.png
