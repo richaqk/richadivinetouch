@@ -3087,16 +3087,11 @@ img {
 
       stage.addEventListener("touchmove", (event) => {
         if (!isTouching) return;
+        // Don't prevent default - let page scroll work normally
+        // Only track movement for internal logic without blocking page scroll
         
         const touchX = event.touches[0].clientX;
         const deltaX = touchX - touchStartX;
-        const deltaY = event.touches[0].clientY - touchStartY;
-        
-        // Only prevent default if it's a clear horizontal swipe (more horizontal than vertical)
-        // This allows vertical scroll to work when swiping up/down
-        if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 10) {
-            event.preventDefault(); // Only prevent default for horizontal swipe
-        }
         
         // Map touch movement to card indices
         const threshold = 50; // pixels needed to move to next card
@@ -3105,7 +3100,7 @@ img {
         // Clamp base to valid range [0, count-1]
         state.base = ((newBase % count) + count) % count;
         resetAutoSlide();
-      }, { passive: false });
+      }, { passive: true });
 
       stage.addEventListener("touchend", () => {
         isTouching = false;
