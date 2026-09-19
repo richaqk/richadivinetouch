@@ -3111,6 +3111,19 @@ img {
             return; // Let page scroll naturally
         }
         
+        // Get the filmstrip state to check if we're near the end
+        const currentPhase = state.phase;
+        const isAtStart = currentPhase <= 0.5;
+        const isAtEnd = currentPhase >= count - 1.5;
+        
+        // Allow page scroll if at the edges of filmstrip
+        if (isAtStart && event.deltaX < 0) {
+            return; // Let page scroll left
+        }
+        if (isAtEnd && event.deltaX > 0) {
+            return; // Let page scroll right
+        }
+        
         // For horizontal scroll, prevent default and handle filmstrip movement
         event.preventDefault();
         const direction = Math.sign(event.deltaX);
@@ -3143,16 +3156,18 @@ img {
 
       function resetAutoSlide() {
         if (autoSlideTimer) clearTimeout(autoSlideTimer);
-        isAutoPlaying = false;
+        // Auto-play only when filmstrip is idle for 5 seconds
         if (cards.length > 0) {
-          // Restart auto-play after 3 seconds of inactivity
           autoSlideTimer = setTimeout(() => {
-            if (!isAutoPlaying) {
+            // Only auto-play if user hasn't interacted recently and not already auto-playing
+            if (performance.now() - state.lastInput > 5000 && !isAutoPlaying) {
               isAutoPlaying = true;
               state.base = ((state.base + 1) % count + count) % count;
+              // Reset auto-play after each card advances
               resetAutoSlide();
+              isAutoPlaying = false;
             }
-          }, 3000);
+          }, 5000);
         }
       }
 
