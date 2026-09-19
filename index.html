@@ -837,7 +837,7 @@
             isolation: isolate;
             perspective: 1450px;
             cursor: ew-resize;
-            touch-action: none;
+            touch-action: pan-y;
             background:
                 linear-gradient(90deg, rgba(80, 58, 31, 0.08) 1px, transparent 1px) 50% 0 / 25% 100%,
                 repeating-linear-gradient(0deg, transparent 0, transparent 109px, rgba(72, 52, 30, 0.13) 110px, transparent 111px),
@@ -2150,13 +2150,6 @@
 html, body {
     overflow-x: hidden;
     position: relative;
-}
-
-/* Fix filmstrip stage overflow */
-.stage {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    scroll-behavior: smooth;
 }
 
 /* Ensure images don't overflow containers */
