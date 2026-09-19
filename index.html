@@ -3073,39 +3073,8 @@ img {
         card.addEventListener("focus", () => moveTo(index));
       });
 
-      // Mobile touch support for filmstrip scrolling
-      let touchStartX = 0;
-      let touchStartBase = 0;
-      let isTouching = false;
-
-      stage.addEventListener("touchstart", (event) => {
-        isTouching = true;
-        touchStartX = event.touches[0].clientX;
-        touchStartY = event.touches[0].clientY; // Added Y coordinate
-        touchStartBase = state.base;
-      }, { passive: false });
-
-      stage.addEventListener("touchmove", (event) => {
-        if (!isTouching) return;
-        // Don't prevent default - let page scroll work normally
-        // Only track movement for internal logic without blocking page scroll
-        
-        const touchX = event.touches[0].clientX;
-        const deltaX = touchX - touchStartX;
-        
-        // Map touch movement to card indices
-        const threshold = 50; // pixels needed to move to next card
-        const newBase = touchStartBase - Math.round(deltaX / threshold);
-        
-        // Clamp base to valid range [0, count-1]
-        state.base = ((newBase % count) + count) % count;
-        resetAutoSlide();
-      }, { passive: true });
-
-      stage.addEventListener("touchend", () => {
-        isTouching = false;
-        resetAutoSlide();
-      });
+      // Touch/swipe disabled on mobile - only navigation buttons work
+      // Touch handlers removed - film strip can only be navigated via buttons
 
       stage.addEventListener("wheel", (event) => {
         // Only handle horizontal scroll - allow vertical scroll to pass through to page
