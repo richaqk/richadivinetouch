@@ -39,67 +39,122 @@
     <link rel="apple-touch-icon" href="images/favicon.png" />
 
     <!-- ═══ JSON-LD Structured Data ═══ -->
+    
+    <!-- Local Business Schema -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
       "@type": "BeautySalon",
       "name": "Richa Divine Touch",
       "alternateName": "Touch of Grace by Richa",
-      "description": "Premium freelance makeup artistry specializing in Bridal, Reception, Pre-Wedding, Baby Shower & Party looks. Best bridal makeup artist in Patna, Bihar with pan-India bookings.",
+      "description": "Premium bridal, reception, pre-wedding, baby shower and party makeup artist in Patna, Bihar.",
       "url": "https://richadivinetouch.in/",
       "logo": "https://richadivinetouch.in/images/divinetouch%20logo.png",
       "image": "https://richadivinetouch.in/images/divinetouch%20logo.png",
-      "founder": {"@type": "Person", "name": "Richa Mishra", "jobTitle": "Professional Makeup Artist"},
-      "address": {"@type": "PostalAddress", "addressLocality": "Patna", "addressRegion": "Bihar", "addressCountry": "IN"},
+      "founder": {
+        "@type": "Person",
+        "name": "Richa Mishra",
+        "jobTitle": "Professional Makeup Artist"
+      },
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "Patna",
+        "addressRegion": "Bihar",
+        "addressCountry": "IN"
+      },
       "telephone": "+916207761003",
       "email": "richamishra066@gmail.com",
       "sameAs": [
         "https://www.instagram.com/divinetouch.by.richa/"
       ],
       "priceRange": "₹₹₹",
-      "areaServed": {"@type": "Country", "name": "India"},
+      "areaServed": {
+        "@type": "Country",
+        "name": "India"
+      },
       "hasOfferCatalog": {
         "@type": "OfferCatalog",
         "name": "Makeup Services",
         "itemListElement": [
-          {"@type": "Offer", "itemOffered": {"@type": "Service", "name": "Bridal Makeup Patna"}},
-          {"@type": "Offer", "itemOffered": {"@type": "Service", "name": "HD Airbrush Bridal Makeup"}},
-          {"@type": "Offer", "itemOffered": {"@type": "Service", "name": "Reception Makeup"}},
-          {"@type": "Offer", "itemOffered": {"@type": "Service", "name": "Pre-Wedding Shoot Makeup"}},
-          {"@type": "Offer", "itemOffered": {"@type": "Service", "name": "Baby Shower Makeup"}},
-          {"@type": "Offer", "itemOffered": {"@type": "Service", "name": "Party Makeup"}},
-          {"@type": "Offer", "itemOffered": {"@type": "Service", "name": "Glam Makeup"}},
-          {"@type": "Offer", "itemOffered": {"@type": "Service", "name": "Editorial Makeup"}}
+          {
+            "@type": "Offer",
+            "itemOffered": {
+              "@type": "Service",
+              "name": "Bridal Makeup"
+            }
+          },
+          {
+            "@type": "Offer",
+            "itemOffered": {
+              "@type": "Service",
+              "name": "HD Airbrush Bridal Makeup"
+            }
+          },
+          {
+            "@type": "Offer",
+            "itemOffered": {
+              "@type": "Service",
+              "name": "Reception Makeup"
+            }
+          },
+          {
+            "@type": "Offer",
+            "itemOffered": {
+              "@type": "Service",
+              "name": "Pre-Wedding Shoot Makeup"
+            }
+          },
+          {
+            "@type": "Offer",
+            "itemOffered": {
+              "@type": "Service",
+              "name": "Baby Shower Makeup"
+            }
+          },
+          {
+            "@type": "Offer",
+            "itemOffered": {
+              "@type": "Service",
+              "name": "Party Makeup"
+            }
+          }
         ]
       }
     }
     </script>
     
-    <!-- Local Business Schema for Google Maps/SEO -->
+    <!-- Makeup Artist Schema -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
       "@type": "MakeupArtist",
       "name": "Richa Divine Touch",
-      "description": "Professional Bridal, Reception, Pre-Wedding, Baby Shower & Party Makeup Artist in Patna, Bihar",
-      "address": {"@type": "PostalAddress", "addressLocality": "Patna", "addressRegion": "Bihar", "addressCountry": "IN"},
+      "description": "Professional bridal, reception, pre-wedding, baby shower and party makeup artist in Patna, Bihar.",
+      "url": "https://richadivinetouch.in/",
       "telephone": "+916207761003",
       "email": "richamishra066@gmail.com",
-      "url": "https://richadivinetouch.in",
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "Patna",
+        "addressRegion": "Bihar",
+        "addressCountry": "IN"
+      }
     }
     </script>
     
-    <!-- Breadcrumb Schema for SEO -->
+    <!-- Breadcrumb Schema -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
       "@type": "BreadcrumbList",
-      "itemListElement": [{
-        "@type": "ListItem",
-        "position": 1,
-        "name": "Home",
-        "item": "https://richadivinetouch.in/"
-      }]
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Home",
+          "item": "https://richadivinetouch.in/"
+        }
+      ]
     }
     </script>
 
